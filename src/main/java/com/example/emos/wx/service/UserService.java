@@ -9,4 +9,6 @@ public interface UserService {
     * 查询权限
     * */
     public Set<String> searchUserPermissions(int userId);
+
+    public Integer login(String Code);
 }

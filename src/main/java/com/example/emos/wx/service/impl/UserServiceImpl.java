@@ -77,4 +77,15 @@ public class UserServiceImpl implements UserService {
         return permissions;
     }
 
+    @Override
+    public Integer login(String Code) {
+        String openId = getOpenId(Code);
+        Integer id = userDao.selectByOpenId(openId);
+        if (id == null){
+            throw new EmosException("账户不存在");
+        }
+        //TODO 获取消息，放到消息表中
+        return id;
+    }
+
 }
