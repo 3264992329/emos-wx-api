@@ -90,7 +90,7 @@ public class OAuth2Filter extends AuthenticatingFilter {
                 resp.getWriter().print("令牌已过期");
                 return false;
             }
-        }catch (JWTDecodeException e){//如果Redis不存在令牌，让用户重新登录
+        }catch (Exception e){//如果Redis不存在令牌，让用户重新登录
             resp.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             resp.getWriter().print("无效令牌");
             return false;

@@ -5,6 +5,7 @@ import com.example.emos.wx.config.shiro.ThreadLocalToken;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
+import org.aspectj.lang.annotation.Pointcut;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -14,11 +15,12 @@ public class TokenAspect {
     @Autowired
     private ThreadLocalToken threadLocalToken;
 
-    @Around("execution(public * com.example.emos.wx.*.*(..))")
+    @Pointcut("execution(public * com.example.emos.wx.controller.*.*(..))")
     public void aspect(){
 
     }
 
+    @Around("aspect()")
     public Object around(ProceedingJoinPoint joinPoint) throws Throwable {
         R r = (R) joinPoint.proceed();
         String token = threadLocalToken.getToken();

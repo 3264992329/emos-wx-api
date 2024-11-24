@@ -13,10 +13,9 @@ public class Xss implements Filter {
     }
 
     @Override
-    public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
-        ServletRequest request = servletRequest;
+    public void doFilter(ServletRequest request, ServletResponse response, FilterChain filterChain) throws IOException, ServletException {
         XssHttpServletRequestWrapper xssRequest = new XssHttpServletRequestWrapper((HttpServletRequest) request);
-        filterChain.doFilter(xssRequest, servletResponse);
+        filterChain.doFilter(xssRequest, response);
     }
 
     @Override

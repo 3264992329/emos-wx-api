@@ -7,5 +7,6 @@ import java.util.List;
 
 @Mapper
 public interface SysConfigDao {
+    //缓存系统常量数据
     public List<SysConfig> selectAllParam();
 }
