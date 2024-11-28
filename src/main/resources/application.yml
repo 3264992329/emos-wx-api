@@ -70,8 +70,8 @@ emos:
     expire: 5
     cache-expire: 10
   face:
-    createFaceModelUrl: http://IP地址:3000/create_face_model
-    checkinUrl: http://IP地址:3000/checkin
+    createFaceModelUrl: http://172.20.10.3:3000/create_face_model
+    checkinUrl: http://172.20.10.3:3000/checkin
   email:
     system: 邮箱1
     hr: 邮箱2

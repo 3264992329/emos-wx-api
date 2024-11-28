@@ -2,18 +2,24 @@ package com.example.emos.wx.service.impl;
 
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.io.FileUtil;
+import cn.hutool.http.HttpRequest;
+import cn.hutool.http.HttpResponse;
+import cn.hutool.http.HttpUtil;
 import com.example.emos.wx.config.SystemConstants;
-import com.example.emos.wx.db.dao.SysConfigDao;
-import com.example.emos.wx.db.dao.TbCheckinDao;
-import com.example.emos.wx.db.dao.TbHolidaysDao;
-import com.example.emos.wx.db.dao.TbWorkdayDao;
+import com.example.emos.wx.controller.form.CheckinForm;
+import com.example.emos.wx.db.dao.*;
+import com.example.emos.wx.db.pojo.TbCheckin;
+import com.example.emos.wx.exception.EmosException;
 import com.example.emos.wx.service.CheckinService;
 import lombok.extern.slf4j.Slf4j;
 import org.jsoup.helper.DataUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.HashMap;
 
 @Service
@@ -28,8 +34,18 @@ public class CheckinServiceImpl implements CheckinService {
 
     @Autowired
     private TbCheckinDao tbCheckinDao;
+
     @Autowired
     private SystemConstants systemConstants;
+
+    @Autowired
+    private TbFaceModelDao tbFaceModelDao;
+
+    @Value("${emos.face.createFaceModelUrl}")
+    private String createFaceModelUrl;
+
+    @Value("${emos.face.checkinUrl}")
+    private String checkinUrl;
 
     @Override
     public String validCanCheckIn(int UserId, String date) {
@@ -72,6 +88,62 @@ public class CheckinServiceImpl implements CheckinService {
                 map.put("endTime", endTime);
                 boolean b = tbCheckinDao.haveCheckin(map) != null ? true : false;
                 return b ? "已经签到，不能重复签到":"可以签到";
+            }
+        }
+    }
+
+    @Override
+    public void checkIn(HashMap param) {
+        Date d1 = DateUtil.date();//当前时间
+        //签到开始时间
+        Date d2 = DateUtil.parse(systemConstants.getAttendanceStartTime()+" "+DateUtil.today());
+        //签到结束时间
+        Date d3 = DateUtil.parse(systemConstants.getAttendanceEndTime()+" "+DateUtil.today());
+        //签到时间判断
+        int status=1;
+        if (d1.compareTo(d2)<=0){
+            status=1;  //正常签到
+        }else if (d1.compareTo(d3)<0 && d1.compareTo(d2)>0){
+            status=2;  //迟到
+        }
+        //查询人脸模型
+        Integer userId = (Integer) param.get("userId");
+        String faceModel = tbFaceModelDao.searchFaceModel(userId);
+        if (faceModel == null){
+            throw new EmosException("不存在人脸比对信息");
+        }else {
+            String path = (String) param.get("path");
+            //发起人脸数据比对请求
+            HttpRequest request = HttpUtil.createPost(checkinUrl);
+            request.form("phone", FileUtil.file(path),"targetModel",faceModel);
+            HttpResponse response = request.execute();//发起请求
+            //判断响应信息
+            if ("无法识别出人脸".equals(response.body()) || "照片中存在多张人脸".equals(response.body())){
+                throw new EmosException(response.body());
+            }else if ("False".equals(response.body())){
+                throw new EmosException("签到无效，非本人签到");
+            }else if ("True".equals(response.body())){
+                //TODO 查询疫情风险等级
+                int risk=1;
+                //TODO 保存签到记录
+                String address = (String) param.get("address");
+                String country = (String) param.get("country");
+                String province = (String) param.get("province");
+                String city = (String) param.get("city");
+                String districet = (String) param.get("districet");
+
+                TbCheckin entity = new TbCheckin();
+                entity.setUserId(userId);
+                entity.setAddress(address);
+                entity.setCountry(country);
+                entity.setProvince(province);
+                entity.setCity(city);
+                entity.setDistrict(districet);
+                entity.setStatus((byte)status);
+                entity.setRisk(risk);
+                entity.setDate(DateUtil.today());
+                entity.setCreateTime(d1);
+                tbCheckinDao.insertCheckin(entity);
             }
         }
     }

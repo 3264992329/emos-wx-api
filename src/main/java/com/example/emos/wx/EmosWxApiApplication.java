@@ -28,6 +28,9 @@ public class EmosWxApiApplication {
     @Autowired
     private SystemConstants systemConstants;
 
+    @Value("${emos.image-folder}")
+    private String imageFolder;
+
     public static void main(String[] args) {
         SpringApplication.run(EmosWxApiApplication.class, args);
     }
@@ -49,6 +52,7 @@ public class EmosWxApiApplication {
                 log.error("执行异常:"+e.getMessage(),e);
             }
         });
+        new File(imageFolder).mkdirs();
     }
 
 }
