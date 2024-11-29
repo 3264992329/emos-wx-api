@@ -1,17 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.example.emos.wx.db.dao.TbFaceModelDao">
-    <select id="searchFaceModel" resultType="java.lang.String" parameterType="string">
+    <select id="searchFaceModel" resultType="java.lang.String" parameterType="int">
         select face_model
         from tb_face_model
-        where user_id=${userId}
+        where user_id=#{userId}
     </select>
     <insert id="insertFaceModel" parameterType="com.example.emos.wx.db.pojo.TbFaceModel">
         insert into tb_face_model
-        set user_id=${userId},face_model=${faceModel}
+        set user_id=#{userId},
+            face_model=#{faceModel}
     </insert>
     <delete id="deleteFaceModel" parameterType="int">
         delete from tb_face_model
-        where id=${id}
+        where id=#{id}
     </delete>
 </mapper>

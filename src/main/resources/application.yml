@@ -70,13 +70,15 @@ emos:
     expire: 5
     cache-expire: 10
   face:
-    createFaceModelUrl: http://172.20.10.3:3000/create_face_model
-    checkinUrl: http://172.20.10.3:3000/checkin
+    #createFaceModelUrl: http://172.20.10.3:3000/create_face_model
+    #checkinUrl: http://172.20.10.3:3000/checkin
+    createFaceModelUrl: http://192.168.10.104:3000/create_face_model
+    checkinUrl: http://192.168.10.104:3000/checkin
   email:
     system: 邮箱1
     hr: 邮箱2
   image-folder: D:/emos/image
-  code: HelloWorld
+  code: E54CCA90527269F8
   recieveNotify: http://IP地址:8080/emos-wx-api/meeting/recieveNotify
 workflow:
   url: http://IP地址:9090/emos-workflow

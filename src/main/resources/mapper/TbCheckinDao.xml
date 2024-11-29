@@ -11,29 +11,29 @@
     <insert id="insertCheckin" parameterType="com.example.emos.wx.db.pojo.TbCheckin">
         insert into tb_checkin
         set
-            user_id=${userId},
+            user_id=#{userId},
             <if test="address!=null">
-                address=${address},
+                address=#{address},
             </if>
-            <if test="contry!=null">
-                contry=${contry},
+            <if test="country!=null">
+                country=#{country},
             </if>
             <if test="province!=null">
-                province=${provinece},
+                province=#{province},
             </if>
             <if test="city!=null">
-                city=${city},
+                city=#{city},
             </if>
             <if test="district!=null">
-                district=${district},
+                district=#{district},
             </if>
             <if test="status!=null">
-                status=${status},
+                status=#{status},
             </if>
             <if test="risk!=null">
-                risk=${risk},
+                risk=#{risk},
             </if>
-            date=${date},
-            create_time=${createTime}
+            date=#{date},
+            create_time=NOW()
     </insert>
 </mapper>

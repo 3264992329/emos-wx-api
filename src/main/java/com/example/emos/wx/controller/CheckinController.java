@@ -2,9 +2,11 @@ package com.example.emos.wx.controller;
 
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.io.IORuntimeException;
 import com.example.emos.wx.common.util.R;
 import com.example.emos.wx.config.shiro.JwtUtil;
 import com.example.emos.wx.controller.form.CheckinForm;
+import com.example.emos.wx.exception.EmosException;
 import com.example.emos.wx.service.CheckinService;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
@@ -26,8 +28,10 @@ public class CheckinController {
 
     @Autowired
     private CheckinService checkinService;
+
     @Autowired
     private JwtUtil jwtUtil;
+
     @Value("${emos.image-folder}")
     private String imageFolder;
 
@@ -75,6 +79,36 @@ public class CheckinController {
 
         }
 
+    }
+
+    @PostMapping("/createFaceModel")
+    @ApiOperation("创建人脸模型")
+    private R createFaceModel(@RequestParam("photo") MultipartFile file,@RequestHeader("token") String token){
+        int userId = jwtUtil.getUserId(token);
+        //判断文件是否为空
+        if (file == null) {
+            return R.error("创建人脸模型失败，文件为空");
+        }
+        //判断是否以.jpg结尾
+        String fileName = file.getOriginalFilename().toLowerCase();
+        String path = imageFolder + "/" + fileName;
+
+        if (!fileName.endsWith(".jpg")){
+            FileUtil.del(path);
+            return R.error("签到失败，文件名必须以.JPG结尾");
+        }else {
+            //创建人脸模型
+            try {
+                file.transferTo(Paths.get(path)); //保存图片
+                checkinService.createFaceModel(userId, path);
+                return R.ok("创建人脸模型成功");
+            } catch (IOException e) {
+                log.error(e.getMessage());
+                throw new EmosException("保存图片错误");
+            } finally {
+                FileUtil.del(path);
+            }
+        }
     }
 
 }
