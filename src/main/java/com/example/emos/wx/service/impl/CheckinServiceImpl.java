@@ -1,5 +1,7 @@
 package com.example.emos.wx.service.impl;
 
+import cn.hutool.core.date.DateField;
+import cn.hutool.core.date.DateRange;
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.io.FileUtil;
@@ -20,8 +22,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 
 @Service
 @Scope("prototype")
@@ -169,6 +173,77 @@ public class CheckinServiceImpl implements CheckinService {
             tbFaceModelDao.insertFaceModel(tbFaceModel);
         }
 
+    }
+
+    //查询员工当天签到情况
+    @Override
+    public HashMap searchTodayCheckin(int userId) {
+        HashMap map = tbCheckinDao.searchTodayCheckin(userId);
+        return map;
+    }
+    //员工请考勤日期总数
+    @Override
+    public long searchCheckinDays(int userId) {
+        long days = tbCheckinDao.searchCheckinDays(userId);
+        return days;
+    }
+
+    //循环查询一定范围内签到情况
+    @Override
+    public ArrayList<HashMap> searchWeekCheckin(HashMap param) {
+        //查询特殊日期
+        ArrayList<String> workdayList = tbWorkdayDao.searchWorkdayInRange(param);
+        ArrayList<String> holidaysList = tbHolidaysDao.searchHolidaysInRange(param);
+        ArrayList<HashMap> checkinList = tbCheckinDao.searchWeekCheckin(param);
+        //查询范围的开始时间，结束时间
+        DateTime startDate = DateUtil.parse(param.get("startDate").toString());
+        DateTime endDate = DateUtil.parse(param.get("endDate").toString());
+        DateRange range = DateUtil.range(startDate, endDate, DateField.DAY_OF_MONTH);
+        ArrayList list = new ArrayList();
+
+        range.forEach(one -> {
+            String date = one.toString("yyyy-MM-dd");
+            //查询该天是否为工作日，节假日，特殊工作日或特殊节假日
+            String type="工作日";
+            if (one.isWeekend()){
+                type="节假日";
+            }
+            if (holidaysList.contains(date)&&holidaysList !=null){
+                type="节假日";
+            }
+            if (workdayList.contains(date)&&workdayList !=null){
+                type="工作日";
+            }
+
+            String status="";
+            //查看是签到状态，如果签到表查询不到，默认为“缺勤”
+            if (type.equals("工作日")&&DateUtil.compare(one,DateUtil.date())<=0){
+                status="缺勤";
+                boolean flag = false;
+                for (HashMap<String,String> map : checkinList) {
+                    if (map.containsValue(date)){
+                      status=map.get("status");
+                      flag=true;
+                      break;
+                    }
+                }
+
+                DateTime endTime = DateUtil.parse(DateUtil.today() + " " + systemConstants.getAttendanceEndTime());
+                String today = DateUtil.today();
+                if (date.equals(today)&&DateUtil.date().isBefore(endTime)){
+                    status="";
+                }
+
+            }
+            HashMap map = new HashMap();
+            map.put("date", date);
+            map.put("type", type);
+            map.put("status", status);
+            map.put("day", one.dayOfWeekEnum().toChinese("周"));
+            list.add(map);
+        });
+        //将查询结果封装到hashmap中，并加入到list集合当中
+        return list;
     }
 
 

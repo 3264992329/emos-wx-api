@@ -10,4 +10,6 @@ import java.util.List;
 @Mapper
 public interface TbHolidaysDao {
     public Integer searchTodayIsHolidays();
+    //查询特定范围内的特殊节假日
+    public ArrayList<String> searchHolidaysInRange(HashMap param);
 }

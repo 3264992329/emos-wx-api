@@ -4,4 +4,9 @@
     <select id="searchTodayIsHolidays" resultType="Integer">
         select id from tb_holidays where date=CURRENT_DATE limit 1
     </select>
+    <select id="searchHolidaysInRange" parameterType="hashmap" resultType="string">
+        select date
+        from tb_holidays
+        where date between #{startDate} and #{endDate}
+    </select>
 </mapper>
