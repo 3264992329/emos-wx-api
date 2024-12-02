@@ -54,5 +54,14 @@
         from tb_user
         where id=#{userId}
     </select>
-
+    <select id="searchUserHiredate" parameterType="int" resultType="string">
+        select hiredate
+        from tb_user
+        where id=#{userId} and status='1'
+    </select>
+    <select id="searchUserSummary" parameterType="int" resultType="hashmap">
+        select u.name,u.photo,dp.dept_name as deptName
+        from tb_user u left join tb_dept dp on u.dept_id=dp.id
+        where u.id=#{userId} and u.status=1
+    </select>
 </mapper>

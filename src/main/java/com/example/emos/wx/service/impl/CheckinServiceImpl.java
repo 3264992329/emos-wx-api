@@ -230,7 +230,7 @@ public class CheckinServiceImpl implements CheckinService {
 
                 DateTime endTime = DateUtil.parse(DateUtil.today() + " " + systemConstants.getAttendanceEndTime());
                 String today = DateUtil.today();
-                if (date.equals(today)&&DateUtil.date().isBefore(endTime)){
+                if (date.equals(today)&&DateUtil.date().isBefore(endTime)&& !flag){
                     status="";
                 }
 

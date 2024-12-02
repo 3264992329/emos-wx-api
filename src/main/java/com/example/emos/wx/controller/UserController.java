@@ -14,6 +14,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.util.HashMap;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
@@ -56,4 +57,11 @@ public class UserController {
         return R.ok("登录成功").put("token", token).put("permission", permissions);
     }
 
+    @GetMapping("/searchUserSummary")
+    @ApiOperation("用户信息页面数据查询")
+    public R searchUserSummary(@RequestHeader("token") String token) {
+        int userId = jwtUtil.getUserId(token);
+        HashMap map = userService.searchUserSummary(userId);
+        return R.ok().put("result", map);
+    }
 }
