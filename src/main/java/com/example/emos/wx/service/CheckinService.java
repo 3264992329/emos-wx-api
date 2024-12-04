@@ -13,4 +13,8 @@ public interface CheckinService {
     public long searchCheckinDays(int userId);
     //
     public ArrayList<HashMap> searchWeekCheckin(HashMap param);
+
+    //月考勤
+    public ArrayList<HashMap> searchMonthCheckin(HashMap param);
+
 }

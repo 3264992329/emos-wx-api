@@ -1,6 +1,7 @@
 package com.example.emos.wx.service;
 
 import com.example.emos.wx.db.pojo.TbUser;
+import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
 import java.util.Set;

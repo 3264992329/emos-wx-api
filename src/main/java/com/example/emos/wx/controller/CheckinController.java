@@ -7,6 +7,7 @@ import com.example.emos.wx.common.util.R;
 import com.example.emos.wx.config.SystemConstants;
 import com.example.emos.wx.config.shiro.JwtUtil;
 import com.example.emos.wx.controller.form.CheckinForm;
+import com.example.emos.wx.controller.form.SearchMonthCheckinForm;
 import com.example.emos.wx.exception.EmosException;
 import com.example.emos.wx.service.CheckinService;
 import com.example.emos.wx.service.UserService;
@@ -144,5 +145,50 @@ public class CheckinController {
         ArrayList<HashMap> hashMaps = checkinService.searchWeekCheckin(param);
         map.put("weekCheckin",hashMaps);
         return R.ok().put("result",map);
+    }
+
+    @PostMapping("/searchMonthCheckin")
+    @ApiOperation("查询用户当月签到数据")
+    private R searchMonthCheckin(@RequestBody SearchMonthCheckinForm form,@RequestHeader String token){
+        //查询入职日期
+        int userId = jwtUtil.getUserId(token);
+        DateTime hiredate = DateUtil.parse(userService.searchUserHiredate(userId));
+        //月份处理为2位数
+        String month = form.getMonth() < 10 ? "0" + form.getMonth() : "" + form.getMonth();
+        //某年某月起始日期
+        DateTime startDate = DateUtil.parse(form.getYear()+"-"+month+"-01");
+        //如果查询月份早于入职月份，抛出异常
+        if (startDate.isBefore(DateUtil.beginOfMonth(hiredate))){
+            throw new EmosException("只能查询入职之后的考勤数据");
+        }
+        //如果查询月份与入职月份恰好是同月，本月考勤查询开始日期设置成入职日期
+        if (startDate.isBefore(hiredate)){
+            startDate=hiredate;
+        }
+        //某年某月的截止日期
+        DateTime endDate = DateUtil.endOfMonth(startDate);
+
+        HashMap map = new HashMap();
+        map.put("startDate",startDate.toString());
+        map.put("endDate",endDate.toString());
+        map.put("userId",userId);
+
+        ArrayList<HashMap> list = checkinService.searchMonthCheckin(map);
+        //统计月考勤数据
+        final int[] sum_1 = {0};
+        final int[] sum_2 = { 0 };
+        final int[] sum_3 = { 0 };
+        list.forEach(one ->{
+            if (one.get("type").equals("工作日")){
+                if (one.get("status").equals("正常")){
+                    sum_1[0]++;
+                }else if (one.get("status").equals("迟到")){
+                    sum_2[0]++;
+                } else if (one.get("status").equals("缺勤")) {
+                    sum_3[0]++;
+                }
+            }
+        });
+        return R.ok().put("sum_1", sum_1[0]).put("sum_2", sum_2[0]).put("sum_3", sum_3[0]).put("list",list);
     }
 }

@@ -1,9 +1,12 @@
 package com.example.emos.wx.service.impl;
 
+import cn.hutool.core.util.IdUtil;
 import cn.hutool.http.HttpUtil;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
+import com.example.emos.wx.Task.MessageTask;
 import com.example.emos.wx.db.dao.TbUserDao;
+import com.example.emos.wx.db.pojo.MessageEntity;
 import com.example.emos.wx.db.pojo.TbUser;
 import com.example.emos.wx.exception.EmosException;
 import com.example.emos.wx.service.UserService;
@@ -27,6 +30,8 @@ public class UserServiceImpl implements UserService {
     private String appSecret;
     @Autowired
     private TbUserDao userDao;
+    @Autowired
+    private MessageTask messageTask;
 
     private String getOpenId(String code){
         String url="https://api.weixin.qq.com/sns/jscode2session";
@@ -62,6 +67,16 @@ public class UserServiceImpl implements UserService {
                 map.put("root",true);
                 userDao.insert(map);
                 Integer id = userDao.selectByOpenId(openId);
+
+                //异步发送系统管理员注册成功消息
+                MessageEntity entity = new MessageEntity();
+                entity.setSenderId(0);
+                entity.setSenderName("系统消息");
+                entity.setUuid(IdUtil.simpleUUID());
+                entity.setMsg("你已成功注册为超级管理员，请及时更新你的个人信息。");
+                entity.setSendTime(new Date());
+                messageTask.sendAsync(id+"",entity);
+
                 return id;
             }else {
                 throw new EmosException("无法绑定超级管理员账号");
@@ -71,6 +86,8 @@ public class UserServiceImpl implements UserService {
         }
 
     }
+
+
 
     @Override
     public Set<String> searchUserPermissions(int userId) {
@@ -85,7 +102,9 @@ public class UserServiceImpl implements UserService {
         if (id == null){
             throw new EmosException("账户不存在");
         }
-        //TODO 获取消息，放到消息表中
+
+        // 获取消息，放到消息表中
+        messageTask.receiveAsync(id+"");
         return id;
     }
 

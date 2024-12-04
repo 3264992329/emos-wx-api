@@ -1,18 +1,16 @@
 package com.example.emos.wx.db.dao;
 
 import cn.hutool.core.date.DateField;
+import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.json.JSONObject;
 import com.example.emos.wx.db.pojo.MessageEntity;
 import com.example.emos.wx.db.pojo.MessageRefEntity;
-import com.mongodb.client.result.DeleteResult;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.aggregation.Aggregation;
 import org.springframework.data.mongodb.core.aggregation.AggregationResults;
 import org.springframework.data.mongodb.core.query.Criteria;
-import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.Date;
@@ -24,63 +22,61 @@ public class MessageDao {
     @Autowired
     private MongoTemplate mongoTemplate;
 
-    public String insert(MessageEntity entity){
-        Date sendTime=entity.getSendTime();
-        sendTime=DateUtil.offset(sendTime, DateField.HOUR,8);
+    //将消息对象插入到MongoDB中
+    public String insertMessage(MessageEntity entity) {
+        //将北京时间转为格林尼治时间
+        Date sendTime = entity.getSendTime();
+        sendTime = DateUtil.offset(sendTime, DateField.HOUR, 8);
         entity.setSendTime(sendTime);
-        entity=mongoTemplate.save(entity);
+        entity = mongoTemplate.save(entity);
         return entity.get_id();
     }
 
+    //分页查询
     public List<HashMap> searchMessageByPage(int userId,long start,int length){
-        JSONObject json=new JSONObject();
+        JSONObject json = new JSONObject();
         json.set("$toString","$_id");
-        Aggregation aggregation=Aggregation.newAggregation(
+        Aggregation aggregation = Aggregation.newAggregation(
                 Aggregation.addFields().addField("id").withValue(json).build(),
+                //关联查询，将本集合与message_ref集合进行关联，关联条件：message.id=message_ref.messageId,并存储到ref字段
                 Aggregation.lookup("message_ref","id","messageId","ref"),
+                //分页查询
                 Aggregation.match(Criteria.where("ref.receiverId").is(userId)),
-                Aggregation.sort(Sort.by(Sort.Direction.DESC,"sendTime")),
                 Aggregation.skip(start),
                 Aggregation.limit(length)
         );
-        AggregationResults<HashMap> results=mongoTemplate.aggregate(aggregation,"message",HashMap.class);
-        List<HashMap> list=results.getMappedResults();
-        list.forEach(one->{
-            List<MessageRefEntity> refList= (List<MessageRefEntity>) one.get("ref");
-            MessageRefEntity entity=refList.get(0);
-            boolean readFlag=entity.getReadFlag();
-            String refId=entity.get_id();
+        //执行聚合查询
+        AggregationResults<HashMap> result = mongoTemplate.aggregate(aggregation, "message", HashMap.class);
+        List<HashMap> list = result.getMappedResults();
+
+        list.forEach(one ->{
+            List<MessageRefEntity> refList = (List<MessageRefEntity>) one.get("ref");
+            MessageRefEntity entity = refList.get(0);
+            Boolean readFlag = entity.getReadFlag();
+            String refId = entity.get_id();
             one.put("readFlag",readFlag);
             one.put("refId",refId);
             one.remove("ref");
             one.remove("_id");
-            Date sendTime= (Date) one.get("sendTime");
-            sendTime=DateUtil.offset(sendTime,DateField.HOUR,-8);
+            Date sendTime = (Date) one.get("sendTime");
+            sendTime = DateUtil.offset(sendTime, DateField.HOUR, -8);
 
-            String today=DateUtil.today();
-            if(today.equals(DateUtil.date(sendTime).toDateStr())){
+            String today = DateUtil.today();
+            if (today.equals(DateUtil.date(sendTime).toString())) {
                 one.put("sendTime",DateUtil.format(sendTime,"HH:mm"));
-            }
-            else{
+            }else {
                 one.put("sendTime",DateUtil.format(sendTime,"yyyy/MM/dd"));
             }
         });
         return list;
     }
 
+    //根据消息 ID 查询消息详情。
     public HashMap searchMessageById(String id){
-        HashMap map=mongoTemplate.findById(id,HashMap.class,"message");
-        Date sendTime= (Date) map.get("sendTime");
-        sendTime=DateUtil.offset(sendTime,DateField.HOUR,-8);
+        HashMap map = mongoTemplate.findById(id, HashMap.class, "message");
+        Date sendTime = (Date) map.get("sendTime");
+        sendTime = DateUtil.offset(sendTime, DateField.HOUR, 8);
         map.replace("sendTime",DateUtil.format(sendTime,"yyyy-MM-dd HH:mm"));
         return map;
-    }
-
-    public long deleteUserMessage(int receiverId){
-        Query query=new Query();
-        query.addCriteria(Criteria.where("receiverId").is(receiverId));
-        DeleteResult result=mongoTemplate.remove(query,"message");
-        long rows=result.getDeletedCount();
-        return rows;
     }
 }
