@@ -24,7 +24,7 @@ public class MessageEntity implements Serializable {
 
     private String senderName;
 
-    private String senderPhone="https://static-1258386385.cos.ap-beijing.myqcloud.com/img/System.jpg";
+    private String senderPhoto="https://static-1258386385.cos.ap-beijing.myqcloud.com/img/System.jpg";
 
     private String msg;
 

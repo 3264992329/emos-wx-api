@@ -1,7 +1,6 @@
 package com.example.emos.wx.db.dao;
 
 import cn.hutool.core.date.DateField;
-import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.json.JSONObject;
 import com.example.emos.wx.db.pojo.MessageEntity;
@@ -28,6 +27,7 @@ public class MessageDao {
         Date sendTime = entity.getSendTime();
         sendTime = DateUtil.offset(sendTime, DateField.HOUR, 8);
         entity.setSendTime(sendTime);
+
         entity = mongoTemplate.save(entity);
         return entity.get_id();
     }

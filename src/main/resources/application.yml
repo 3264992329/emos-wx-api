@@ -80,6 +80,11 @@ emos:
   image-folder: D:/emos/image
   code: E54CCA90527269F8
   recieveNotify: http://IP地址:8080/emos-wx-api/meeting/recieveNotify
+
+rabbitmq:
+  #factoryHost : 172.20.10.3
+  factoryHost : 192.168.10.104
+
 workflow:
   url: http://IP地址:9090/emos-workflow
 

@@ -104,7 +104,7 @@ public class UserServiceImpl implements UserService {
         }
 
         // 获取消息，放到消息表中
-        messageTask.receiveAsync(id+"");
+        //messageTask.receiveAsync(id+"");
         return id;
     }
 
