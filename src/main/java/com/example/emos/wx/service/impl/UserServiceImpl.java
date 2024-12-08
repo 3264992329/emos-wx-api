@@ -5,6 +5,7 @@ import cn.hutool.http.HttpUtil;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import com.example.emos.wx.Task.MessageTask;
+import com.example.emos.wx.db.dao.TbDeptDao;
 import com.example.emos.wx.db.dao.TbUserDao;
 import com.example.emos.wx.db.pojo.MessageEntity;
 import com.example.emos.wx.db.pojo.TbUser;
@@ -16,9 +17,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Set;
+import java.util.*;
 
 @Service
 @Slf4j
@@ -32,6 +31,8 @@ public class UserServiceImpl implements UserService {
     private TbUserDao userDao;
     @Autowired
     private MessageTask messageTask;
+    @Autowired
+    private TbDeptDao deptDao;
 
     private String getOpenId(String code){
         String url="https://api.weixin.qq.com/sns/jscode2session";
@@ -124,6 +125,30 @@ public class UserServiceImpl implements UserService {
     public HashMap searchUserSummary(int userId) {
         HashMap map = userDao.searchUserSummary(userId);
         return map;
+    }
+
+    @Override
+    public ArrayList<HashMap> searchUserGroupByDept(String keyword) {
+        ArrayList<HashMap> list1 = deptDao.searchDeptMembers(keyword);
+        ArrayList<HashMap> list2 = deptDao.searchUserGroupByDept(keyword);
+        for (HashMap map1 : list1) {
+            String id1 = map1.get("id").toString();
+            ArrayList members = new ArrayList();
+            for (HashMap map2 : list2) {
+                String id2 = map2.get("deptId").toString();
+                if (id2.equals(id1)){
+                    members.add(map2);
+                }
+            }
+            map1.put("members", members);
+        }
+        return list1;
+    }
+
+    @Override
+    public ArrayList<HashMap> searchMembers(List param) {
+        ArrayList<HashMap> list = userDao.searchMembers(param);
+        return list;
     }
 
 }

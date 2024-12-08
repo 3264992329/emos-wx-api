@@ -3,7 +3,9 @@ package com.example.emos.wx.service;
 import com.example.emos.wx.db.pojo.TbUser;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Set;
 
 public interface UserService {
@@ -23,4 +25,8 @@ public interface UserService {
 
     //用户页面数据加载
     public HashMap searchUserSummary(int userId);
+
+    public ArrayList<HashMap> searchUserGroupByDept(String keyword);
+
+    public ArrayList<HashMap> searchMembers(List param);
 }

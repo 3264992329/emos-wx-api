@@ -64,4 +64,12 @@
         from tb_user u left join tb_dept dp on u.dept_id=dp.id
         where u.id=#{userId} and u.status=1
     </select>
+    <select id="searchMembers" resultType="java.util.HashMap">
+        select id,name,photo
+        from tb_user u
+        where u.status=1
+        and u.id in <foreach collection="param" item="one" separator="," open="(" close=")">
+        #{one}
+    </foreach>
+    </select>
 </mapper>

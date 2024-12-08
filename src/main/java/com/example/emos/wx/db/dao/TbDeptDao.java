@@ -9,15 +9,9 @@ import java.util.List;
 
 @Mapper
 public interface TbDeptDao {
-
     public ArrayList<HashMap> searchDeptMembers(String keyword);
 
-    public List<TbDept> searchAllDept();
+    public ArrayList<HashMap> searchUserGroupByDept(String keyword);
 
-    public int insertDept(String deptName);
-
-    public int deleteDeptById(int id);
-
-    public int updateDeptById(TbDept entity);
 
 }
