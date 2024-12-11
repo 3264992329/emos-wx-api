@@ -50,7 +50,7 @@ public class TestController {
 
             MessageRefEntity ref=new MessageRefEntity();
             ref.setMessageId(id);
-            ref.setReceiverId(19); //注意：这是接收人ID
+            ref.setReceiverId(3); //注意：这是接收人ID
             ref.setLastFlag(true);
             ref.setReadFlag(false);
             messageService.insertRef(ref);
@@ -64,13 +64,13 @@ public class TestController {
             meeting.setId((long)i);
             meeting.setUuid(IdUtil.simpleUUID());
             meeting.setTitle("测试会议"+i);
-            meeting.setCreatorId(19L); //ROOT用户ID
+            meeting.setCreatorId(3L); //ROOT用户ID
             meeting.setDate(DateUtil.today());
             meeting.setPlace("线上会议室");
             meeting.setStart("19:30");
             meeting.setEnd("23:30");
             meeting.setType((short) 1);
-            meeting.setMembers("[19,20]");
+            meeting.setMembers("[3,4]");
             meeting.setDesc("会议研讨Emos项目上线测试");
             meeting.setInstanceId(IdUtil.simpleUUID());
             meeting.setStatus((short)3);

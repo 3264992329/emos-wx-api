@@ -9,4 +9,10 @@ public interface MeetingService {
     public void insertMeeting(TbMeeting entity);
 
     public ArrayList<HashMap> searchMyMeetingListByPage(HashMap param);
+
+    public HashMap searchMeetingById(int id);
+
+    public void updateMeetingInfo(HashMap param);
+
+    public void deleteMeetingById(int id);
 }

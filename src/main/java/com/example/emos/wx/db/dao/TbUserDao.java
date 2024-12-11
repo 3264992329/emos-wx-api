@@ -25,4 +25,12 @@ public interface TbUserDao {
     public HashMap searchUserSummary(int userId);
 
     public ArrayList<HashMap> searchMembers(List param);
+
+    public HashMap searchUserInfo(int userId);
+
+    public Integer searchDeptManagerId(int id);
+
+    public Integer searchGmId();
+
+    public List<HashMap> selectUserPhotoAndName(List param);
 }

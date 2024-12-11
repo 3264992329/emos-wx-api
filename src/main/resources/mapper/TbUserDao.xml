@@ -72,4 +72,45 @@
         #{one}
     </foreach>
     </select>
+    <select id="searchUserInfo" resultType="hashmap" parameterType="int">
+        select
+            u.open_id as openId,
+            u.name,
+            u.photo,
+            u.sex,
+            u.email,
+            u.nickname,
+            u.tel,
+            u.hiredate,
+            d.dept_name as dept,
+            case u.status
+                when 1 then '在职'
+                when 2 then '离职'
+            end as status,
+            (select group_concat(role_name separator ',') from tb_role where JSON_CONTAINS(u.role,convert(id,char ))) as roles
+        from tb_user u left join tb_dept d on u.dept_id=d.id
+        where u.status=1 and u.id=#{userId}
+    </select>
+    <select id="searchDeptManagerId" parameterType="int" resultType="integer">
+        select u2.id
+        from tb_user u1 join tb_user u2 on u1.dept_id=u2.dept_id
+        join tb_role r on JSON_CONTAINS(u2.role,cast(r.id as char))
+        where u1.id=#{id} and u1.status=1 and u2.status=2 and r.id=2
+    </select>
+    <select id="searchGmId" resultType="integer">
+        select u.id
+        from tb_user u
+        join tb_role r on JSON_CONTAINS(u.role,cast(r.id as char ))
+        where r.id=1 and u.status=1;
+    </select>
+    <select id="selectUserPhotoAndName" parameterType="list" resultType="hashmap">
+        select
+            name,
+            photo
+        from tb_user
+        where status=1 and id in
+        <foreach collection="list" close=")" separator="," open="(" item="one">
+            #{one}
+        </foreach>
+    </select>
 </mapper>

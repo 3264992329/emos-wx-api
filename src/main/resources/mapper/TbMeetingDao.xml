@@ -42,4 +42,65 @@
         ORDER BY m.date,m.start,m.id
         LIMIT #{start}, #{length}
     </select>
+    <select id="searchMeetingMembersInSameDept" parameterType="String" resultType="boolean">
+        SELECT
+            IF(COUNT(DISTINCT u.dept_id)=1,TRUE,FALSE ) AS bool
+        FROM tb_meeting m
+                 JOIN tb_user u ON JSON_CONTAINS ( m.members, CAST( u.id AS CHAR ) )
+        WHERE m.uuid=#{uuid} AND u.status = 1
+    </select>
+    <update id="updateMeetingInstanceId" parameterType="HashMap">
+        UPDATE tb_meeting
+        SET instance_id=#{instanceId}
+        WHERE uuid=#{uuid}
+    </update>
+    <select id="searchMeetingById" parameterType="int" resultType="hashmap">
+        select
+            m.uuid,
+            m.creator_id as creatorId,
+            m.title,
+            u.name,
+            DATE_FORMAT(m.date,'%Y-%m-%d') as date,
+            m.place,
+            DATE_FORMAT(m.start,'%H:%i') as start,
+            DATE_FORMAT(m.end,'%H:%i') as end,
+            m.type,
+            m.status,
+            m.desc,
+            m.instance_id as instanceId
+        from tb_meeting m
+        join tb_user u on u.id=m.creator_id
+        where m.id=#{id} and u.status=1
+    </select>
+    <select id="searchMeetingMembers" parameterType="int" resultType="hashmap">
+        select
+            u.id,
+            u.name,
+            u.photo
+        from tb_meeting m
+        join tb_user u on JSON_CONTAINS(m.members,cast(u.id as char ))
+        where m.id=#{id} and u.status=1;
+    </select>
+    <update id="updateMeetingInfo" parameterType="hashmap">
+        update tb_meeting
+        set title=#{title},
+            date=#{date},
+            <if test="place!==null">
+                place=#{place},
+            </if>
+            <if test="place==null">
+                place=null,
+            </if>
+            start=#{start},
+            end=#{end},
+            type=#{type},
+            members=#{members},
+            `desc`=#{desc},
+            status=#{status}
+        where status=3 and id=#{id}
+    </update>
+    <delete id="deleteMeetingById" parameterType="int">
+        delete from tb_meeting
+        where id=#{id} and status=3
+    </delete>
 </mapper>

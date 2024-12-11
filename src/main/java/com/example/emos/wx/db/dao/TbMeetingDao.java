@@ -14,4 +14,15 @@ public interface TbMeetingDao {
 
     public ArrayList<HashMap> searchMyMeetingListByPage(HashMap param);
 
+    public boolean searchMeetingMembersInSameDept(String uuid);
+
+    public int updateMeetingInstanceId(HashMap param);
+
+    public HashMap searchMeetingById(int id);
+
+    public ArrayList<HashMap> searchMeetingMembers(int id);
+
+    public int updateMeetingInfo(HashMap param);
+
+    public int deleteMeetingById(int id);
 }

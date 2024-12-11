@@ -3,10 +3,7 @@ package com.example.emos.wx.controller;
 import cn.hutool.json.JSONUtil;
 import com.example.emos.wx.common.util.R;
 import com.example.emos.wx.config.shiro.JwtUtil;
-import com.example.emos.wx.controller.form.LoginForm;
-import com.example.emos.wx.controller.form.RegisterForm;
-import com.example.emos.wx.controller.form.SearchMembersForm;
-import com.example.emos.wx.controller.form.SearchUserGroupByDeptForm;
+import com.example.emos.wx.controller.form.*;
 import com.example.emos.wx.exception.EmosException;
 import com.example.emos.wx.service.UserService;
 import com.example.emos.wx.service.impl.UserServiceImpl;
@@ -105,4 +102,14 @@ public class UserController {
         return R.ok().put("result", list);
     }
 
+    @PostMapping("/selectUserPhotoAndName")
+    @ApiOperation("查询用户头像和姓名")
+    public R selectUserPhotoAndName(@RequestBody @Valid SelectUserPhotoAndNameForm form){
+        if (!JSONUtil.isJsonArray(form.getIds())){
+            throw new EmosException("list不是json格式的数组");
+        }
+        List<Integer> param = JSONUtil.parseArray(form.getIds()).toList(Integer.class);
+        List<HashMap> list = userService.selectUserPhotoAndName(param);
+        return R.ok().put("result", list);
+    }
 }
