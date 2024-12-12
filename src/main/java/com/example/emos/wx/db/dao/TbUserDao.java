@@ -33,4 +33,6 @@ public interface TbUserDao {
     public Integer searchGmId();
 
     public List<HashMap> selectUserPhotoAndName(List param);
+
+    public String searchMemberEmail(int id);
 }

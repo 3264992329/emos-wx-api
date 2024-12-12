@@ -157,4 +157,10 @@ public class UserServiceImpl implements UserService {
         return list;
     }
 
+    @Override
+    public String searchMemberEmail(int id) {
+        String email = userDao.searchMemberEmail(id);
+        return email;
+    }
+
 }

@@ -165,7 +165,13 @@
         <dependency>
             <groupId>org.json</groupId>
             <artifactId>json</artifactId>
-            <version>20200518</version>
+            <version>20231013</version>
+        </dependency>
+        <!--userSig依赖-->
+        <dependency>
+            <groupId>com.github.tencentyun</groupId>
+            <artifactId>tls-sig-api-v2</artifactId>
+            <version>2.0</version>
         </dependency>
     </dependencies>
 

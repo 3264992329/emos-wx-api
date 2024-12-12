@@ -92,8 +92,8 @@ workflow:
   #url: http://192.168.10.104:9090/emos-workflow
 
 trtc:
-  appid: appid
-  key: 密钥
+  appid: 1231215
+  key: 54564654
   expire: 86400
 wx:
   app-id: wxcecd1b26810ffbd2

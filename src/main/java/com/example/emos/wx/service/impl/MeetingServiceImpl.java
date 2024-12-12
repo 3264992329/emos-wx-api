@@ -6,7 +6,6 @@ import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.http.HttpRequest;
 import cn.hutool.http.HttpResponse;
-import cn.hutool.json.JSON;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import com.example.emos.wx.db.dao.TbMeetingDao;
@@ -14,16 +13,17 @@ import com.example.emos.wx.db.dao.TbUserDao;
 import com.example.emos.wx.db.pojo.TbMeeting;
 import com.example.emos.wx.exception.EmosException;
 import com.example.emos.wx.service.MeetingService;
-import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
-import org.json.JSONArray;
-import org.jsoup.helper.DataUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 @Service
 @Slf4j
@@ -42,6 +42,9 @@ public class MeetingServiceImpl implements MeetingService {
 
     @Value("${emos.code}")
     private String code;
+
+    @Autowired
+    private RedisTemplate redisTemplate;
 
 
     @Override
@@ -147,6 +150,20 @@ public class MeetingServiceImpl implements MeetingService {
             throw new EmosException("删除工作流失败");
         }
 
+    }
+
+    @Override
+    public Long searchRoomIdByUuid(String uuid) {
+
+        Object temp = redisTemplate.opsForValue().get(uuid);
+        long roomId = Long.parseLong(temp.toString());
+        return roomId;
+    }
+
+    @Override
+    public List<String> searchUserMeetingInMonth(HashMap param) {
+        List<String> list = meetingDao.searchUserMeetingInMonth(param);
+        return list;
     }
 
     private void startMeetingWorkflow(String uuid, int creatorId, String date, String start) {

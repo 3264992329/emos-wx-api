@@ -25,4 +25,6 @@ public interface TbMeetingDao {
     public int updateMeetingInfo(HashMap param);
 
     public int deleteMeetingById(int id);
+
+    public List<String> searchUserMeetingInMonth(HashMap param);
 }

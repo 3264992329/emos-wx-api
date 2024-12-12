@@ -7,6 +7,7 @@ import com.example.emos.wx.controller.form.*;
 import com.example.emos.wx.exception.EmosException;
 import com.example.emos.wx.service.UserService;
 import com.example.emos.wx.service.impl.UserServiceImpl;
+import com.tencentyun.TLSSigAPIv2;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
@@ -37,6 +38,12 @@ public class UserController {
     private RedisTemplate redisTemplate;
     @Value("${emos.jwt.cache-expire}")
     private String cacheExpire;
+    @Value("${trtc.appid}")
+    private Integer appid;
+    @Value("${trtc.key}")
+    private String key;
+    @Value("${trtc.expire}")
+    private Integer expire;
 
     @PostMapping("/register")
     @ApiOperation("注册用户")
@@ -111,5 +118,16 @@ public class UserController {
         List<Integer> param = JSONUtil.parseArray(form.getIds()).toList(Integer.class);
         List<HashMap> list = userService.selectUserPhotoAndName(param);
         return R.ok().put("result", list);
+    }
+
+    @PostMapping("/genUserSig")
+    @ApiOperation("生成用户签名")
+    public R searchMemberEmail(@RequestHeader("token") String token){
+        int userId = jwtUtil.getUserId(token);
+        String email = userService.searchMemberEmail(userId);
+
+        TLSSigAPIv2 api = new TLSSigAPIv2(appid, key);
+        String userSig = api.genUserSig(email, expire);
+        return R.ok().put("userSig", userSig).put("email", email);
     }
 }
